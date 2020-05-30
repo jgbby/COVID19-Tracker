@@ -1,0 +1,33 @@
+{
+    "manifest_version": 2,
+    "name": "COVID-2020",
+    "version": "0.9",
+    "icons": {
+       "16": "img/icon16.png",
+       "32": "img/icon32.png",
+       "48": "img/icon48.png",
+       "128": "img/icon128.png"
+    },
+    "permissions": [
+      "https://www.worldometers.info/coronavirus/country/us/",
+      "activeTab"
+    ],
+
+    "background": {
+      "scripts": ["./js/requester.js", "./js/jquery-3.4.1.slim.min.js"]
+    },
+
+    "content_scripts": [ {
+      "matches": ["https://*/*"],
+      "js": ["./js/replace.js", "./js/jquery-3.4.1.slim.min.js"]
+    } ],
+ 
+    "browser_action": {
+      "default_icon": "img/icon.png",
+      "default_popup": "popup.html",
+      "default_title": "Covid-2020"
+    },
+    "content_security_policy":
+      "script-src 'self' https://www.worldometers.info https://code.jquery.com https://stackpath.bootstrapcdn.com https://fonts.googleapis.com https://cdnjs.cloudflare.com; object-src 'self'"
+  }
+ 
