@@ -39,25 +39,14 @@ function displayData(data) {
   // Compute US Total
   usTotalPresent = data[0]["USATotal"];
   usTotalPast = data[1]["USATotal"];
-  var curTotalActiveCases = usTotalPresent.activeCases.replace(/,/g, "");
-  var pastTotalActiveCases = usTotalPast.activeCases.replace(/,/g, "");
-  var totalRow = [];
 
-  // Percentage for total US cases
-  var percentage = (
-    (100 * curTotalActiveCases) / pastTotalActiveCases -
-    100
-  ).toFixed(2);
-  if (percentage > 0) {
-    percentage = "<span style='color: red'> +" + percentage + "%</span>";
-  } else {
-    percentage *= -1;
-    percentage = "<span style='color: #5ced83'>-" + percentage + "%</span>";
-  }
+  // Percent Change for total US cases
+  var USTotalPercentChange = getPercentChangeInHTML(usTotalPast.activeCases, usTotalPresent.activeCases);
 
-  totalRow.push(
+  // Display US Total Row
+  addRow(
     "US",
-    percentage,
+    USTotalPercentChange,
     usTotalPresent.totalCases,
     usTotalPresent.activeCases,
     usTotalPresent.newCases,
@@ -70,39 +59,13 @@ function displayData(data) {
     e = data[0][areas[i]];
     ePast = data[1][areas[i]];
 
-    var activeCases = e.activeCases.replace(/,/g, "");
-    var pastActiveCases = ePast.activeCases.replace(/,/g, "");
-
     // Get Percentage and format Positive and Negative
-    var percentage = ((100 * activeCases) / pastActiveCases - 100).toFixed(2);
-    if (percentage >= 0) {
-      // Float formatting
-      percentage = percentage.toString();
-      index = percentage.indexOf(".") + 1;
-      percentage =
-        percentage.slice(0, index) +
-        " " +
-        percentage.slice(index, percentage.length);
-
-      percentage = "<span style='color: red'> +" + percentage + "%</span>";
-    } else {
-      percentage *= -1;
-
-      // Float formatting
-      percentage = percentage.toString();
-      index = percentage.indexOf(".") + 1;
-      percentage =
-        percentage.slice(0, index) +
-        " " +
-        percentage.slice(index, percentage.length);
-
-      percentage = "<span style='color: #5ced83'>-" + percentage + "%</span>";
-    }
+    var areaPercentChange = getPercentChangeInHTML(ePast.activeCases, e.activeCases)
 
     // Display Row
     addRow(
       fixState(areas[i]),
-      percentage,
+      areaPercentChange,
       e.totalCases,
       e.activeCases,
       e.newCases,
@@ -110,31 +73,6 @@ function displayData(data) {
       e.newDeaths
     );
   }
-
-  document.querySelector("#total").innerHTML =
-    "\
-    <td> US </td>\
-    <td>" +
-    totalRow[1] +
-    "</td>\
-    <td>" +
-    totalRow[2] +
-    "</td>\
-    <td>" +
-    totalRow[3] +
-    "</td>\
-    <td>" +
-    totalRow[4] +
-    "</td>\
-    <td>" +
-    totalRow[5] +
-    "</td>\
-    <td>" +
-    totalRow[6] +
-    "</td>";
-
-  console.log("\nToday's Total Active Cases: " + curTotalActiveCases);
-  console.log("\nYesterdays Total Active Cases: " + pastTotalActiveCases);
 }
 
 // Display Row to pop.html
@@ -147,33 +85,33 @@ function addRow(
   deaths,
   newDeaths
 ) {
-  if (state != "USTotal") {
-    document.querySelector("tbody").innerHTML +=
-      "\
-    <tr>\
-      <td>" +
-      state +
-      "</td>\
-      <td>" +
-      percentage +
-      "</td>\
-      <td>" +
-      totalCases +
-      "</td>\
-      <td>" +
-      activeCases +
-      "</td>\
-      <td>" +
-      newCases +
-      "</td>\
-      <td>" +
-      deaths +
-      "</td>\
-      <td>" +
-      newDeaths +
-      "</td>\
-    </tr>";
-  }
+
+  var selector = (state == "US") ? "#total" : "tbody";
+  document.querySelector(selector).innerHTML +=
+    "\
+  <tr>\
+    <td>" +
+    state +
+    "</td>\
+    <td>" +
+    percentage +
+    "</td>\
+    <td>" +
+    totalCases +
+    "</td>\
+    <td>" +
+    activeCases +
+    "</td>\
+    <td>" +
+    newCases +
+    "</td>\
+    <td>" +
+    deaths +
+    "</td>\
+    <td>" +
+    newDeaths +
+    "</td>\
+  </tr>";
 }
 
 // User Input
@@ -186,6 +124,52 @@ function userInput() {
       console.log("SENT REPLACE");
     });
   });
+}
+
+function calculatePercentChange(past, present){
+
+  var percentage = (
+    100 * (present - past) 
+              / past
+    ).toFixed(2);
+  return percentage;
+}
+
+function getPercentChangeInHTML(past, present){
+
+  if (past.includes(",")) past = removeCommas(past); 
+  if (present.includes(",")) present = removeCommas(present);
+
+  var percentage = calculatePercentChange(past, present);
+
+  // Check positive or negative
+  var color = '';
+  var sign = '';
+  if (percentage >= 0) {
+    color = 'red';
+    sign = '+';
+  }
+  else {
+    percentage *= -1;
+    color = '#5ced83';
+    sign = '-';
+  }
+  percentage = Math.abs(percentage)
+
+  // Float Formatting
+  percentageStr = percentage.toString();
+  index = percentageStr.indexOf(".") + 1;
+  percentageStr = percentageStr.slice(0, index) + " " + percentageStr.slice(index, percentageStr.length);
+  return "<span style='color: " + color + "'> " + sign + percentageStr + "%</span>";
+
+}
+
+function removeCommas(str){
+  newStr = "";
+  for (let i=0; i < str.length; i++){
+    if (str[i] != ",") newStr += str[i]; 
+  }
+  return newStr;
 }
 
 // Fix states
