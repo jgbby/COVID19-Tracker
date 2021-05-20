@@ -9,4 +9,4 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         document.body.innerHTML = document.body.innerHTML.replace(/disease/g, message);
         document.body.innerHTML = document.body.innerHTML.replace(/pandemic/g, message);
     }
-  });
+});

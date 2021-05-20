@@ -127,19 +127,28 @@ function userInput() {
 }
 
 function calculatePercentChange(past, present){
-
+  
   var percentage = (
     100 * (present - past) 
               / past
     ).toFixed(2);
-  return percentage;
+  return (past == 0) ? 0 : percentage;
 }
 
 function getPercentChangeInHTML(past, present){
 
-  if (past.includes(",")) past = removeCommas(past); 
-  if (present.includes(",")) present = removeCommas(present);
+  // Remove all commas
+  strs = [past, present];
+  newStrs = ["", ""];
+  for (let i=0; i < 2; i++){
+    for (let j=0; j < strs[i].length; j++){
+      if (strs[i][j] != ",") newStrs[i] += strs[i][j]
+    }
+  }
+  past = newStrs[0];
+  present = newStrs[1];
 
+  // Calculate Percent Change
   var percentage = calculatePercentChange(past, present);
 
   // Check positive or negative
@@ -160,16 +169,8 @@ function getPercentChangeInHTML(past, present){
   percentageStr = percentage.toString();
   index = percentageStr.indexOf(".") + 1;
   percentageStr = percentageStr.slice(0, index) + " " + percentageStr.slice(index, percentageStr.length);
-  return "<span style='color: " + color + "'> " + sign + percentageStr + "%</span>";
-
-}
-
-function removeCommas(str){
-  newStr = "";
-  for (let i=0; i < str.length; i++){
-    if (str[i] != ",") newStr += str[i]; 
-  }
-  return newStr;
+  
+  return "<span style='color: " + color + "'> " + sign + percentage.toString() + "%</span>";
 }
 
 // Fix states
