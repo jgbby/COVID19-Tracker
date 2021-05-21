@@ -20,8 +20,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log("Recieved Data");
     data = request.data;
 
-    console.log(data[0]);
-    console.log(data[1]);
+    console.log(data.Today);
+    console.log(data.Yesterday);
     displayData(data);
   }
 });
@@ -32,13 +32,13 @@ userInput();
 // Render Data
 function displayData(data) {
   // List of all geographical locations to iterate through
-  present_keys = Object.keys(data[0]);
-  past_keys = Object.keys(data[1]);
+  present_keys = Object.keys(data.Today);
+  past_keys = Object.keys(data.Yesterday);
   areas = present_keys.filter((element) => past_keys.includes(element));
 
   // Compute US Total
-  usTotalPresent = data[0]["USATotal"];
-  usTotalPast = data[1]["USATotal"];
+  usTotalPresent = data.Today.USATotal;
+  usTotalPast = data.Yesterday.USATotal;
 
   // Percent Change for total US cases
   var USTotalPercentChange = getPercentChangeInHTML(usTotalPast.activeCases, usTotalPresent.activeCases);
@@ -56,8 +56,8 @@ function displayData(data) {
 
   // Iterate through each location's data
   for (i = 1; i < areas.length; i++) {
-    e = data[0][areas[i]];
-    ePast = data[1][areas[i]];
+    e = data.Today[areas[i]];
+    ePast = data.Yesterday[areas[i]];
 
     // Get Percentage and format Positive and Negative
     var areaPercentChange = getPercentChangeInHTML(ePast.activeCases, e.activeCases)
@@ -165,12 +165,18 @@ function getPercentChangeInHTML(past, present){
   }
   percentage = Math.abs(percentage)
 
-  // Float Formatting
+  // Float Formatting because decimals are tough to see
   percentageStr = percentage.toString();
-  index = percentageStr.indexOf(".") + 1;
-  percentageStr = percentageStr.slice(0, index) + " " + percentageStr.slice(index, percentageStr.length);
+  if (percentageStr.includes(".")){
+    index1 = percentageStr.indexOf(".") - 1;
+    index2 = percentageStr.indexOf(".") + 1;
+    period = ". "
+    if (percentageStr[index2] == "2") period = " " + period;
+    percentageStr = percentageStr.slice(0, index1) + period + percentageStr.slice(index2, percentageStr.length);
+  }
+
   
-  return "<span style='color: " + color + "'> " + sign + percentage.toString() + "%</span>";
+  return "<span style='color: " + color + "'> " + sign + percentageStr + "%</span>";
 }
 
 // Fix states

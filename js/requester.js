@@ -117,7 +117,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 var newDeaths = ($($(element).find('td')[headers["NewDeaths"]]).text());
                 newDeaths = newDeaths.replace(/\s+/g, '');
                 if (!newDeaths){
-                    newDeaths = "unsure";
+                    newDeaths = "Unsure";
                 }
 
 
@@ -139,7 +139,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 }
             });
 
-            data = [rows, rows1];
+            data = {
+                "Today": rows,
+                "Yesterday": rows1
+            }
             // Send Data
             chrome.runtime.sendMessage({ cmd: "DATA_RESPONSE", data: data });
             console.log("Sent: " + data);
